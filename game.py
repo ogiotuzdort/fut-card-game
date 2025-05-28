@@ -1,6 +1,44 @@
 import random
 import pickle
 
+class Card:
+    def __init__(self, name, pas, shot, fin, speed, defense, endurance):
+        self.name = name
+        self.pas = pas
+        self.shot = shot
+        self.fin = fin
+        self.speed = speed
+        self.defense = defense
+        self.endurance = endurance
+
+    def __str__(self):
+        return (f"{self.name}: PASS={self.pas}, SHOT={self.shot}, FIN={self.fin}, "
+                f"SPEED={self.speed}, DEF={self.defense}, END={self.endurance}")
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'pas': self.pas,
+            'shot': self.shot,
+            'fin': self.fin,
+            'speed': self.speed,
+            'defense': self.defense,
+            'endurance': self.endurance
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            data['name'],
+            data['pas'],
+            data['shot'],
+            data['fin'],
+            data['speed'],
+            data['defense'],
+            data['endurance']
+        )
+
+
 class Player:
     def __init__(self, name):
         self.name = name
@@ -21,10 +59,12 @@ class Player:
     def total_cards(self):
         return len(self.hand)
 
+
 def display_hand(player):
     print(f"\n{player.name}'s Cards:")
     for idx, card in enumerate(player.hand):
         print(f"{idx + 1}. {card}")
+
 
 def choose_stat():
     stats = ["pass", "shot", "fin", "speed", "def", "end", "all"]
@@ -33,6 +73,7 @@ def choose_stat():
         if choice in stats:
             return choice
         print("Invalid choice. Try again.")
+
 
 def compare_cards(card1, card2, stat):
     attr_map = {
@@ -64,24 +105,28 @@ def compare_cards(card1, card2, stat):
         print("🤝 It's a draw!")
         return "draw"
 
-def save_game(filename, player, opponent, deck):
+
+def save_game(filename, player, opponent, deck, is_bot):
     with open(filename, 'wb') as f:
         pickle.dump({
             'player': player,
             'opponent': opponent,
-            'deck': deck
+            'deck': deck,
+            'is_bot': is_bot
         }, f)
     print(f"Game saved to '{filename}'.")
+
 
 def load_game(filename):
     try:
         with open(filename, 'rb') as f:
             data = pickle.load(f)
         print(f"Game loaded from '{filename}'.")
-        return data['player'], data['opponent'], data['deck']
+        return data['player'], data['opponent'], data['deck'], data.get('is_bot', True)
     except FileNotFoundError:
         print(f"'{filename}' not found. Starting a new game.")
-        return None, None, None
+        return None, None, None, None
+
 
 def play_game(player, opponent, deck, filename, is_bot=True):
     turn = 0
@@ -110,6 +155,7 @@ def play_game(player, opponent, deck, filename, is_bot=True):
 
         if is_bot and other_player.name == "Bot":
             opponent_card = random.choice(other_player.hand)
+            print(f"Bot chose: {opponent_card.name}")
         else:
             display_hand(other_player)
             while True:
@@ -139,10 +185,9 @@ def play_game(player, opponent, deck, filename, is_bot=True):
 
         print(f"Score: {player.name} = {player.total_cards()} cards, {opponent.name} = {opponent.total_cards()} cards")
 
-        if is_bot:
-            save = input("Do you want to save the game? (y/n): ").strip().lower()
-            if save == 'y':
-                save_game(filename, player, opponent, deck)
+        save = input("Do you want to save the game? (y/n): ").strip().lower()
+        if save == 'y':
+            save_game(filename, player, opponent, deck, is_bot)
 
         turn += 1
 
