@@ -25,10 +25,9 @@ def main():
             play_game(player, opponent, deck, filename, is_bot)
 
         elif choice == "3":
-            player, opponent, deck = load_game(filename)
+            player, opponent, deck, is_bot = load_game(filename)
             if player and opponent and deck:
-                # Here we assume loading vs Bot mode; for Real Player you'd need extra input
-                play_game(player, opponent, deck, filename, is_bot=True)
+                play_game(player, opponent, deck, filename, is_bot=is_bot)
             else:
                 print("❌ Save not found. Please start a new game first.")
 
@@ -40,3 +39,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
